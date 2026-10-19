@@ -343,7 +343,7 @@ if(new URLSearchParams(location.search).get('verifica')==='foto'){
 'use strict';
 const API='https://diario-fit-api.paolodicaro-3d.workers.dev',KEY='diariogym_account_token_test',DATA='diariogym_v01';
 const el=id=>document.getElementById(id),gate=el('gymAuthGate'),msg=el('gymGateMessage'),fields=el('gymGateFields'),indicator=el('gymSyncIndicator'),account=el('gymAccountStatus');
-let token=sessionStorage.getItem(KEY),user=null,revision=null,base=null,busy=false,pending=false,halted=false,initializing=true;
+let token=localStorage.getItem(KEY)||sessionStorage.getItem(KEY),user=null,revision=null,base=null,busy=false,pending=false,halted=false,initializing=true;
 const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 const raw=()=>localStorage.getItem(DATA)||'{}';
 const parsed=()=>JSON.parse(raw());
@@ -400,8 +400,8 @@ let debounce;
 window.diarioGymSyncChanged=()=>{pending=true;if(!initializing&&!halted){setStatus('☁️ Modifiche da sincronizzare…');clearTimeout(debounce);debounce=setTimeout(sync,900)}};
 async function authenticate(t){
  token=t;
- try{const d=await api('/api/me');if(!d.user||!d.user.id)throw Error('SESSION_INVALID');user=d.user;sessionStorage.setItem(KEY,t);fields.classList.add('hide');msg.textContent='Accesso verificato. Controllo dati…';await start()}
- catch(e){if(e.message==='SESSION_INVALID'||e.message==='UNAUTHORIZED'||e.message==='INVALID_TOKEN'){sessionStorage.removeItem(KEY);token=null;user=null;showLogin('Sessione scaduta. Accedi nuovamente.')}else{msg.textContent='Connessione non disponibile. Ricarica la pagina per riprovare.';setStatus('☁️ Connessione non disponibile')}}
+ try{const d=await api('/api/me');if(!d.user||!d.user.id)throw Error('SESSION_INVALID');user=d.user;localStorage.setItem(KEY,t);sessionStorage.removeItem(KEY);fields.classList.add('hide');msg.textContent='Accesso verificato. Controllo dati…';await start()}
+ catch(e){if(e.message==='SESSION_INVALID'||e.message==='UNAUTHORIZED'||e.message==='INVALID_TOKEN'){sessionStorage.removeItem(KEY);localStorage.removeItem(KEY);token=null;user=null;showLogin('Sessione scaduta. Accedi nuovamente.')}else{msg.textContent='Connessione non disponibile. Ricarica la pagina per riprovare.';setStatus('☁️ Connessione non disponibile')}}
 }
 el('gymGateLogin').addEventListener('click',async()=>{
  const username=el('gymGateUser').value.trim(),password=el('gymGatePass').value;
@@ -411,7 +411,7 @@ el('gymGateLogin').addEventListener('click',async()=>{
  catch(e){msg.textContent=e.message==='Credenziali non valide'?'Credenziali non corrette.':'Accesso non riuscito. Riprova.'}
  finally{btn.disabled=false}
 });
-el('gymAccountLogout').addEventListener('click',()=>{sessionStorage.removeItem(KEY);location.reload()});
+el('gymAccountLogout').addEventListener('click',()=>{sessionStorage.removeItem(KEY);localStorage.removeItem(KEY);location.reload()});
 window.addEventListener('online',()=>{if(user&&!halted){pending=raw()!==base;sync()}});
 window.addEventListener('focus',()=>{if(user&&!halted){pending=raw()!==base;sync()}});
 setInterval(()=>{if(user&&!halted&&!initializing){pending=raw()!==base;sync()}},20000);
