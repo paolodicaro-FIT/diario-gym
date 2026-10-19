@@ -363,8 +363,7 @@ async function sync(){
  busy=true;
  try{
  const local=raw();
- if(local===base&&!pending){setStatus('☁️ Sincronizzato · rev. '+revision);return}
- setStatus('☁️ Sincronizzazione…');
+ if(local!==base||pending)setStatus('☁️ Sincronizzazione…');
  const remote=await api('/api/gym/state');
  const remoteRaw=remote.exists?hash(remote.state):null;
  if(remote.revision!==revision){
@@ -372,6 +371,7 @@ async function sync(){
   stopConflict();return;
  }
  if(remoteRaw!==null&&remoteRaw!==base){stopConflict();return}
+ if(local===base&&!pending){setStatus('☁️ Sincronizzato · rev. '+revision);return}
  const localObj=JSON.parse(local);
  const saved=await api('/api/gym/state',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({base_revision:revision,state:localObj})});
  revision=saved.revision;base=local;storeBase();pending=false;
