@@ -579,7 +579,7 @@ window.diarioGymSyncChanged=()=>{pending=true;if(!initializing&&!halted){setStat
 async function authenticate(t){
  showLoading();token=t;
  try{const d=await api('/api/me');if(!d.user||!d.user.id)throw Error('SESSION_INVALID');user=d.user;localStorage.setItem(KEY,t);sessionStorage.removeItem(KEY);fields.classList.add('hide');msg.textContent='Accesso verificato. Controllo dati…';await start()}
- catch(e){hideLoading();if(e.message==='SESSION_INVALID'||e.message==='UNAUTHORIZED'||e.message==='INVALID_TOKEN'){sessionStorage.removeItem(KEY);localStorage.removeItem(KEY);token=null;user=null;showLogin('Sessione scaduta. Accedi nuovamente.')}else{msg.textContent='Connessione non disponibile. Ricarica la pagina per riprovare.';setStatus('☁️ Connessione non disponibile')}}
+ catch(e){hideLoading();if(e.message==='SESSION_INVALID'||e.message==='UNAUTHORIZED'||e.message==='INVALID_TOKEN'){sessionStorage.removeItem(KEY);localStorage.removeItem(KEY);token=null;user=null;showLogin('Sessione scaduta. Accedi nuovamente.')}else{showLogin('Verifica della sessione non riuscita. Puoi riprovare ad accedere senza cancellare i dati locali.');setStatus('☁️ Verifica accesso non riuscita');console.warn('[DiarioGYM] Errore verifica sessione:',e?.message||'errore sconosciuto')}}
 }
 el('gymGateLogin').addEventListener('click',async()=>{
  const username=el('gymGateUser').value.trim(),password=el('gymGatePass').value;
