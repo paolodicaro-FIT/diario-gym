@@ -514,7 +514,26 @@ const loading=el('gymAppLoading');const showLoading=()=>loading.classList.remove
 const headers=()=>({Authorization:'Bearer '+token});
 async function api(path,options={}){const r=await fetch(API+path,{...options,cache:'no-store',headers:{...headers(),...(options.headers||{})}});let d;try{d=await r.json()}catch{throw Error('Risposta non valida dal server')}if(!r.ok||!d.ok)throw Error(d.error||'HTTP '+r.status);return d}
 function storeBase(){localStorage.setItem(metaKey(),JSON.stringify({revision,base}))}
-function stopConflict(){halted=true;initializing=false;gate.classList.add('gym-hidden');hideLoading();setStatus('⚠️ Modifiche diverse tra dispositivi: sincronizzazione sospesa, nessun dato sovrascritto.');showCloudRestore()}
+function stopConflict(){halted=true;initializing=false;gate.classList.add('gym-hidden');hideLoading();setStatus('⚠️ Modifiche diverse tra dispositivi: sincronizzazione sospesa, nessun dato sovrascritto.');showCloudRestore();showPhoneRecovery()}
+function showPhoneRecovery(){
+ let btn=el('gymPhoneRecovery');if(!btn){btn=document.createElement('button');btn.id='gymPhoneRecovery';btn.type='button';btn.className='btn secondary';btn.style.cssText='display:block;margin:12px 0;padding:11px 14px;border:1px solid #27cfa8';btn.textContent='📱 Pubblica questa copia sul cloud (recupero)';(el('gymSyncIndicator')?.closest('.card')||account.parentElement).appendChild(btn)}
+ btn.hidden=false;btn.onclick=async()=>{
+  if(!confirm('Usa questa copia LOCALE come versione principale sul cloud? Procedi solo sul CELLULARE dopo aver esportato il backup. I dati cloud precedenti saranno sostituiti; il PC potrà poi scaricarli.'))return;
+  btn.disabled=true;
+  try{
+   const local=parsed();
+   if(!local||!Array.isArray(local.history)||!local.history.length)throw Error('Storico locale mancante: recupero interrotto');
+   const before=await api('/api/gym/state');
+   if(!before.exists||!Number.isInteger(before.revision))throw Error('Revisione cloud non valida');
+   const safe={savedAt:new Date().toISOString(),local:raw(),cloud:before.state,cloudRevision:before.revision,syncMeta:localStorage.getItem(metaKey())};
+   localStorage.setItem('diariogym_recovery_backup_'+user.id+'_'+Date.now(),JSON.stringify(safe));
+   if(!confirm('Ultima conferma: il backup locale e una copia del cloud sono stati salvati su questo dispositivo. Pubblicare '+local.history.length+' allenamenti sul cloud?'))return;
+   const result=await api('/api/gym/state',{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify({base_revision:before.revision,state:local})});
+   revision=result.revision;base=raw();storeBase();pending=false;halted=false;btn.hidden=true;
+   setStatus('☁️ Sincronizzato · rev. '+revision);alert('Recupero completato. Ora puoi aggiornare il PC dal cloud.');
+  }catch(e){alert('Recupero non eseguito: '+e.message+'. I dati locali sono conservati.')}finally{btn.disabled=false}
+ }
+}
 function showCloudRestore(){
  let btn=el('gymCloudRestore');if(!btn){btn=document.createElement('button');btn.id='gymCloudRestore';btn.type='button';btn.className='btn secondary';btn.style.cssText='display:block;margin:12px 0;padding:11px 14px;border:1px solid #27cfa8';btn.textContent='☁️ Ripristina su questo PC i dati dal cloud';(el('gymSyncIndicator')?.closest('.card')||account.parentElement).appendChild(btn)}
  btn.hidden=false;btn.onclick=async()=>{
