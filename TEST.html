@@ -614,4 +614,4 @@ window.addEventListener('focus',()=>{if(user&&!halted){pending=raw()!==base;sync
 setInterval(()=>{if(user&&!halted&&!initializing){pending=raw()!==base;sync()}},20000);
 if(token)authenticate(token);else showLogin();document.addEventListener('pointerdown',()=>keepScreenAwake(),{passive:true});document.addEventListener('keydown',()=>keepScreenAwake());
 })();
-</script></body></html>
+</script><div aria-label="Ambiente di test" style="position:fixed;right:12px;top:calc(env(safe-area-inset-top, 0px) + 10px);z-index:2147483647;background:#a95b0c;color:#fff;border:1px solid #ffd08a;border-radius:999px;padding:5px 10px;font:800 12px system-ui,sans-serif;letter-spacing:1px;box-shadow:0 0 13px #ffae4b88;pointer-events:none">⚗ TEST</div></body></html>
