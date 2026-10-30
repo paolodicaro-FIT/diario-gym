@@ -646,4 +646,15 @@ window.addEventListener('focus',()=>{if(user&&!halted){pending=raw()!==base;sync
 setInterval(()=>{if(user&&!halted&&!initializing){pending=raw()!==base;sync()}},20000);
 if(token)authenticate(token);else showLogin();document.addEventListener('pointerdown',()=>keepScreenAwake(),{passive:true});document.addEventListener('keydown',()=>keepScreenAwake());
 })();
+</script><style id="gym-floating-recovery-v1">
+#gymFloatingRecovery{position:fixed;top:calc(env(safe-area-inset-top,0px) + 8px);left:50%;transform:translateX(-50%);z-index:9998;width:min(360px,calc(100vw - 24px));box-sizing:border-box;background:linear-gradient(120deg,#133d59,#10283e);border:1px solid #38799c;border-radius:14px;box-shadow:0 9px 28px #0009,0 0 18px #168ad344;color:#e7f6ff;padding:8px 12px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+#gymFloatingRecovery[hidden]{display:none!important}#gymFloatingRecovery .gymFloatTime{font-size:23px;font-weight:800;font-variant-numeric:tabular-nums;color:#8cdeff;line-height:1.15}#gymFloatingRecovery .gymFloatLabel{font-size:10px;letter-spacing:.08em;opacity:.8}#gymFloatingRecovery button{border:1px solid #40738f;border-radius:9px;background:#1b4967;color:white;padding:9px 12px;font-weight:700;cursor:pointer}
+</style>
+<div id="gymFloatingRecovery" hidden aria-label="Recupero in corso"><div><div class="gymFloatLabel">⏱ RECUPERO</div><div class="gymFloatTime" id="gymFloatTime">02:00</div></div><button type="button" id="gymFloatPause">Pausa</button></div>
+<script id="gym-floating-recovery-script">
+(()=>{const floating=document.getElementById('gymFloatingRecovery'),time=document.getElementById('gymFloatTime'),pauseButton=document.getElementById('gymFloatPause');const source=document.getElementById('timer'),toggle=document.getElementById('timerToggle'),dock=document.getElementById('timerDock');if(!floating||!source||!toggle||!dock)return;
+let queued=false;function update(){queued=false;const active=toggle.textContent.trim()==='Pausa';const rect=dock.getBoundingClientRect();const visible=!dock.hidden&&rect.bottom>0&&rect.top<window.innerHeight;floating.hidden=!active||visible;time.textContent=source.textContent.trim();}
+function schedule(){if(queued)return;queued=true;requestAnimationFrame(update)}
+pauseButton.addEventListener('click',()=>{toggle.click();schedule()});window.addEventListener('scroll',schedule,{passive:true});window.addEventListener('resize',schedule,{passive:true});new MutationObserver(schedule).observe(source,{childList:true,characterData:true,subtree:true});new MutationObserver(schedule).observe(toggle,{childList:true,characterData:true,subtree:true});new MutationObserver(schedule).observe(dock,{attributes:true,attributeFilter:['hidden']});schedule();
+})();
 </script></body></html>
