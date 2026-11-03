@@ -463,11 +463,11 @@ function openExerciseInfo(ex){
  const isRowReference=nameKey==='row machine a dischi (appoggio toracico)';
  const isBicepsReference=nameKey==='panca scott technogym a dischi';
  const localPhotos=isRowReference?[
-  ['immagini-esercizi/row_posizione_iniziale.webp','Posizione iniziale','Braccia distese, busto stabile e petto in appoggio.'],
-  ['immagini-esercizi/row_contrazione.webp','Contrazione','Tira le impugnature verso il busto, portando i gomiti indietro senza slanci.']
+  ['row_posizione_iniziale.webp','Posizione iniziale','Braccia distese, busto stabile e petto in appoggio.'],
+  ['row_contrazione.webp','Contrazione','Tira le impugnature verso il busto, portando i gomiti indietro senza slanci.']
  ]:isBicepsReference?[
-  ['immagini-esercizi/biceps_posizione_iniziale.webp','Posizione iniziale','Braccia appoggiate e quasi distese, senza forzare i gomiti.'],
-  ['immagini-esercizi/biceps_contrazione.webp','Contrazione','Fletti i gomiti mantenendo le braccia aderenti al supporto.']
+  ['biceps_posizione_iniziale.webp','Posizione iniziale','Braccia appoggiate e quasi distese, senza forzare i gomiti.'],
+  ['biceps_contrazione.webp','Contrazione','Fletti i gomiti mantenendo le braccia aderenti al supporto.']
  ]:null;
  const photos=localPhotos?'<div class="gym-v5-photos">'+localPhotos.map((p,i)=>'<button type="button" class="gym-v5-photo" data-photo="'+p[0]+'"><span class="gym-v5-number">'+(i+1)+'</span><img loading="lazy" src="'+p[0]+'" alt="'+esc(ex.name)+' · '+esc(p[1])+'" onerror="exercisePhotoFallback(this)"><b>'+esc(p[1])+'</b><small>'+esc(p[2])+'</small></button>').join('')+'</div>':base?'<div class="gym-v5-photos">'+[0,1].map(i=>'<button type="button" class="gym-v5-photo" data-photo="'+base+i+'.jpg"><span class="gym-v5-number">'+(i+1)+'</span><img loading="lazy" src="'+base+i+'.jpg" alt="'+esc(ex.name)+' · '+phases[i][0]+'" onerror="exercisePhotoFallback(this)"><b>'+phases[i][0]+'</b><small>'+esc(phases[i][1])+'</small></button>').join('')+'</div>':'<p class="info-photo-pending">Fotografie specifiche non ancora disponibili per questa variante.</p>';
  const name=String(ex.name||'').trim(),key=Object.keys(MUSCLE_GROUP_MAP).find(k=>k.toLowerCase()===name.toLowerCase());let muscle=key?MUSCLE_LABELS[MUSCLE_GROUP_MAP[key]]:d.muscles;
