@@ -689,13 +689,38 @@ pauseButton.addEventListener('click',()=>{toggle.click();schedule()});window.add
 #timerDock .nixie-base{box-shadow:0 -3px 9px #ff5d0099,0 2px 9px #ff5d0099}
 body:not(.light) #timerDock{background:linear-gradient(130deg,#08121d,#070b12)!important}
 @media(prefers-reduced-motion:no-preference){.nixie-digit{animation:nixieHot 3.8s ease-in-out infinite}@keyframes nixieHot{0%,100%{filter:drop-shadow(0 0 5px #ff6200) brightness(1)}50%{filter:drop-shadow(0 0 7px #ff6200) brightness(1.13)}}}
+
+/* Authentic stacked digit electrodes: all ten unlit outlines remain visible. */
+.nixie-wires{position:absolute;inset:5% 6% 7%;width:88%;height:88%;overflow:visible;z-index:1}
+.nixie-wires path{fill:none;stroke-linecap:round;stroke-linejoin:round}
+.nixie-off path{stroke:#a34b22;stroke-width:.62;opacity:.37}
+.nixie-on{stroke:#ff5a00;stroke-width:1.35;filter:drop-shadow(0 0 1px #fff5b5) drop-shadow(0 0 2px #ff9a00) drop-shadow(0 0 4px #ff3900) drop-shadow(0 0 7px #f20)}
+.nixie-wires .nixie-on{stroke:#ff9c17;stroke-width:1.5}
+.nixie-tube{background:radial-gradient(ellipse at 50% 50%,#240803 0%,#070405 65%,#010204 100%)}
+.nixie-display{background:linear-gradient(#0b0404,#010204);box-shadow:inset 0 0 20px #ff3c002a,0 0 15px #ff3c0070}
+#timerDock .nixie-tube{box-shadow:inset 2px 0 5px #ffa44740,inset -3px 0 7px #000,0 0 9px #f40a}
+#gymFloatingRecovery .nixie-wires{inset:5% 4% 7%;width:92%;height:88%}
 </style>
 <script id="gym-nixie-tubes-script">
 (()=>{const source=document.getElementById('timer'),floatSource=document.getElementById('gymFloatTime');if(!source)return;
-function make(){const wrap=document.createElement('span');wrap.className='nixie-display';wrap.setAttribute('aria-hidden','true');for(let i=0;i<5;i++){if(i===2){const c=document.createElement('span');c.className='nixie-colon';c.innerHTML='<i></i><i></i>';wrap.append(c)}else{const tube=document.createElement('span');tube.className='nixie-tube';const digit=document.createElement('span');digit.className='nixie-digit';const base=document.createElement('span');base.className='nixie-base';tube.append(digit,base);wrap.append(tube)}}return wrap}
+const paths=[
+'M20 8 C5 8 6 59 20 61 C35 61 35 8 20 8 Z',
+'M10 20 L20 8 L20 61',
+'M8 20 C8 5 34 4 32 20 C31 30 8 45 8 61 L33 61',
+'M8 14 C16 4 33 8 32 21 C31 30 20 32 16 32 C37 30 38 61 19 61 C12 61 8 58 7 53',
+'M29 61 L29 8 L6 45 L35 45',
+'M32 8 L10 8 L8 33 C30 20 38 40 31 54 C25 67 10 63 7 54',
+'M30 11 C9 2 5 28 8 48 C11 69 35 66 34 48 C33 28 14 28 8 44',
+'M7 8 L34 8 L15 61',
+'M20 8 C3 8 5 32 20 32 C37 32 36 8 20 8 Z M20 32 C3 32 4 61 20 61 C37 61 37 32 20 32 Z',
+'M33 28 C30 5 8 3 7 23 C6 42 33 43 33 21 C36 42 32 63 11 60'
+];
+const NS='http://www.w3.org/2000/svg';
+function element(name,attrs){const e=document.createElementNS(NS,name);for(const [k,v] of Object.entries(attrs||{}))e.setAttribute(k,v);return e}
+function make(){const wrap=document.createElement('span');wrap.className='nixie-display';wrap.setAttribute('aria-hidden','true');for(let i=0;i<5;i++){if(i===2){const c=document.createElement('span');c.className='nixie-colon';c.innerHTML='<i></i><i></i>';wrap.append(c);continue}const tube=document.createElement('span');tube.className='nixie-tube';const svg=element('svg',{class:'nixie-wires',viewBox:'0 0 40 70','aria-hidden':'true'});const dark=element('g',{class:'nixie-off'});paths.forEach(d=>dark.append(element('path',{d})));const active=element('path',{class:'nixie-on',d:paths[0]});svg.append(dark,active);const base=document.createElement('span');base.className='nixie-base';tube.append(svg,base);wrap.append(tube)}return wrap}
 function attach(node){if(!node)return null;const display=make();node.classList.add('nixie-original');node.insertAdjacentElement('afterend',display);return display}
 const main=attach(source),floating=attach(floatSource);
-function paint(display,value){if(!display)return;const chars=/^\d\d:\d\d$/.test(value)?value:'00:00';const digits=display.querySelectorAll('.nixie-digit');[0,1,3,4].forEach((index,j)=>{digits[j].textContent=chars[index]})}
+function paint(display,value){if(!display)return;const chars=/^\d\d:\d\d$/.test(value)?value:'00:00';const digits=display.querySelectorAll('.nixie-on');[0,1,3,4].forEach((index,j)=>digits[j].setAttribute('d',paths[Number(chars[index])]))}
 function sync(){const value=source.textContent.trim();paint(main,value);paint(floating,value)}
 new MutationObserver(sync).observe(source,{childList:true,characterData:true,subtree:true});sync();
 })();
