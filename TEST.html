@@ -664,21 +664,31 @@ let queued=false;function update(){queued=false;const active=toggle.textContent.
 function schedule(){if(queued)return;queued=true;requestAnimationFrame(update)}
 pauseButton.addEventListener('click',()=>{toggle.click();schedule()});window.addEventListener('scroll',schedule,{passive:true});window.addEventListener('resize',schedule,{passive:true});new MutationObserver(schedule).observe(source,{childList:true,characterData:true,subtree:true});new MutationObserver(schedule).observe(toggle,{childList:true,characterData:true,subtree:true});new MutationObserver(schedule).observe(dock,{attributes:true,attributeFilter:['hidden']});schedule();
 })();
-</script><style id="gym-nixie-accent-v1">
-/* Nixie glass tubes: dark smoked glass, copper frames, amber gas glow */
-body:not(.light) #timerDock .timer,body:not(.light) #gymFloatingRecovery .gymFloatTime{
-font-family:'Courier New',ui-monospace,monospace!important;font-weight:900!important;font-variant-numeric:tabular-nums;
-font-size:clamp(28px,7vw,43px)!important;letter-spacing:.10em!important;line-height:1.2!important;
-color:#ffd08b!important;-webkit-text-stroke:.5px #ff9a31;
-text-shadow:0 0 1px #fff4c4,0 0 3px #ffd271,0 0 6px #ff9b19,0 0 12px #ff5b00,0 0 23px #f33400,0 0 38px #e33b0070!important;
-background:repeating-linear-gradient(90deg,#080a0f 0,#131017 3px,#2b1715 6px,#0b0d14 9px,#090a0e 12px);
-border:1px solid #8d4a2b;border-radius:12px;padding:8px 13px;
-box-shadow:inset 0 2px 3px #ffe0a526,inset 0 -7px 16px #000,inset 0 0 22px #f65b001a,0 0 13px #fb5a0038;
-display:inline-block;position:relative;
-}
-body:not(.light) #timerDock{background:linear-gradient(145deg,#281719,#0a111e)!important;border:1px solid #9d4c25!important;box-shadow:inset 0 0 22px #f85b0016,0 0 17px #ff5a0030!important}
-body:not(.light) #gymFloatingRecovery{background:linear-gradient(120deg,#261315,#0b1422)!important;border:1px solid #9d4c25!important;box-shadow:0 9px 28px #000b,0 0 21px #ff600049!important}
-body:not(.light) #gymFloatingRecovery .gymFloatTime{font-size:27px!important;padding:4px 9px;border-radius:9px}
-body:not(.light) #gymFloatingRecovery .gymFloatLabel{color:#ffc08a}
-@media(prefers-reduced-motion:no-preference){body:not(.light) #timerDock .timer,body:not(.light) #gymFloatingRecovery .gymFloatTime{animation:gymNixieWarmth 4s ease-in-out infinite}@keyframes gymNixieWarmth{0%,100%{filter:brightness(1)}45%{filter:brightness(1.12)}52%{filter:brightness(1.04)}60%{filter:brightness(1.12)}}}
-</style></body></html>
+</script><style id="gym-nixie-tubes-v2">
+.nixie-display{display:inline-flex;align-items:flex-end;gap:3px;max-width:100%;padding:4px 6px 5px;border-radius:12px;background:linear-gradient(#180d0d,#080b11);border:1px solid #91421f;box-shadow:inset 0 0 18px #f65b0022,0 0 13px #fb590033}
+.nixie-tube{width:clamp(28px,8vw,43px);height:clamp(57px,15vw,82px);position:relative;flex:none;border-radius:48% 48% 12% 12% / 19% 19% 9% 9%;border:1px solid #a85c37;background:radial-gradient(ellipse at 50% 45%,#4b1b0d 0%,#190d0d 52%,#08080e 95%);box-shadow:inset 3px 0 5px #ffbd5a30,inset -4px 0 8px #000,0 0 7px #ff650044;overflow:hidden}
+.nixie-tube:before{content:"";position:absolute;inset:7px 3px 7px;background:repeating-linear-gradient(32deg,transparent 0 5px,#ed8d3b30 5.5px 6px,transparent 6.5px 11px),repeating-linear-gradient(-32deg,transparent 0 5px,#ed8d3b25 5.5px 6px,transparent 6.5px 11px);border:1px solid #bd692e30;border-radius:6px}
+.nixie-tube:after{content:"";position:absolute;top:3px;left:4px;width:25%;height:75%;border-left:2px solid #fff5d12b;border-radius:50%;pointer-events:none}
+.nixie-digit{position:absolute;inset:0;display:grid;place-items:center;font-family:Georgia,'Times New Roman',serif;font-size:clamp(43px,12vw,67px);font-weight:400;line-height:1;color:transparent;-webkit-text-stroke:1.15px #ffc077;text-shadow:0 0 2px #ffe6a5,0 0 5px #ff9300,0 0 11px #ff5100,0 0 21px #e83500;transform:scaleX(.78);filter:drop-shadow(0 0 4px #ff5800)}
+.nixie-base{position:absolute;bottom:0;left:0;right:0;height:7px;background:linear-gradient(#d98a45,#482012 42%,#9b522b 65%,#26100e);border-top:1px solid #ffbc61}
+.nixie-colon{width:12px;align-self:center;display:flex;flex-direction:column;gap:13px;align-items:center;justify-content:center}
+.nixie-colon i{width:6px;height:6px;border-radius:50%;background:#ffbf67;box-shadow:0 0 4px #ff9b00,0 0 11px #ff5100}
+.nixie-original{position:absolute!important;width:1px!important;height:1px!important;overflow:hidden!important;clip-path:inset(50%)!important;white-space:nowrap!important}
+#gymFloatingRecovery .nixie-display{padding:2px 4px;gap:2px}
+#gymFloatingRecovery .nixie-tube{width:21px;height:38px}
+#gymFloatingRecovery .nixie-digit{font-size:35px;-webkit-text-stroke:.8px #ffc077}
+#gymFloatingRecovery .nixie-colon{width:8px;gap:6px}
+#gymFloatingRecovery .nixie-colon i{width:4px;height:4px}
+#timerDock{overflow:visible}
+@media(max-width:380px){.nixie-tube{width:29px;height:57px}.nixie-digit{font-size:45px}}
+</style>
+<script id="gym-nixie-tubes-script">
+(()=>{const source=document.getElementById('timer'),floatSource=document.getElementById('gymFloatTime');if(!source)return;
+function make(){const wrap=document.createElement('span');wrap.className='nixie-display';wrap.setAttribute('aria-hidden','true');for(let i=0;i<5;i++){if(i===2){const c=document.createElement('span');c.className='nixie-colon';c.innerHTML='<i></i><i></i>';wrap.append(c)}else{const tube=document.createElement('span');tube.className='nixie-tube';const digit=document.createElement('span');digit.className='nixie-digit';const base=document.createElement('span');base.className='nixie-base';tube.append(digit,base);wrap.append(tube)}}return wrap}
+function attach(node){if(!node)return null;const display=make();node.classList.add('nixie-original');node.insertAdjacentElement('afterend',display);return display}
+const main=attach(source),floating=attach(floatSource);
+function paint(display,value){if(!display)return;const chars=/^\d\d:\d\d$/.test(value)?value:'00:00';const digits=display.querySelectorAll('.nixie-digit');[0,1,3,4].forEach((index,j)=>{digits[j].textContent=chars[index]})}
+function sync(){const value=source.textContent.trim();paint(main,value);paint(floating,value)}
+new MutationObserver(sync).observe(source,{childList:true,characterData:true,subtree:true});sync();
+})();
+</script></body></html>
