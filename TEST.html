@@ -669,14 +669,14 @@ pauseButton.addEventListener('click',()=>{toggle.click();schedule()});window.add
 .nixie-tube{width:clamp(28px,8vw,43px);height:clamp(57px,15vw,82px);position:relative;flex:none;border-radius:48% 48% 12% 12% / 19% 19% 9% 9%;border:1px solid #a85c37;background:radial-gradient(ellipse at 50% 45%,#4b1b0d 0%,#190d0d 52%,#08080e 95%);box-shadow:inset 3px 0 5px #ffbd5a30,inset -4px 0 8px #000,0 0 7px #ff650044;overflow:hidden}
 .nixie-tube:before{content:"";position:absolute;inset:7px 3px 7px;background:repeating-linear-gradient(32deg,transparent 0 5px,#ed8d3b30 5.5px 6px,transparent 6.5px 11px),repeating-linear-gradient(-32deg,transparent 0 5px,#ed8d3b25 5.5px 6px,transparent 6.5px 11px);border:1px solid #bd692e30;border-radius:6px}
 .nixie-tube:after{content:"";position:absolute;top:3px;left:4px;width:25%;height:75%;border-left:2px solid #fff5d12b;border-radius:50%;pointer-events:none}
-.nixie-digit{position:absolute;inset:0;display:grid;place-items:center;font-family:Georgia,'Times New Roman',serif;font-size:clamp(43px,12vw,67px);font-weight:400;line-height:1;color:transparent;-webkit-text-stroke:1.15px #ffc077;text-shadow:0 0 2px #ffe6a5,0 0 5px #ff9300,0 0 11px #ff5100,0 0 21px #e83500;transform:scaleX(.78);filter:drop-shadow(0 0 4px #ff5800)}
+.nixie-digit{position:absolute;inset:0;display:grid;place-items:center;font-family:'Helvetica Neue','Arial Narrow',Arial,sans-serif;font-size:clamp(43px,12vw,67px);font-weight:100;line-height:1;color:transparent;-webkit-text-stroke:.65px #ffbc73;text-shadow:0 0 2px #ffc77d,0 0 5px #ff8500,0 0 11px #ff5100;transform:scaleX(.70);filter:drop-shadow(0 0 3px #ff5800)}
 .nixie-base{position:absolute;bottom:0;left:0;right:0;height:7px;background:linear-gradient(#d98a45,#482012 42%,#9b522b 65%,#26100e);border-top:1px solid #ffbc61}
 .nixie-colon{width:12px;align-self:center;display:flex;flex-direction:column;gap:13px;align-items:center;justify-content:center}
 .nixie-colon i{width:6px;height:6px;border-radius:50%;background:#ffbf67;box-shadow:0 0 4px #ff9b00,0 0 11px #ff5100}
 .nixie-original{position:absolute!important;width:1px!important;height:1px!important;overflow:hidden!important;clip-path:inset(50%)!important;white-space:nowrap!important}
 #gymFloatingRecovery .nixie-display{padding:2px 4px;gap:2px}
 #gymFloatingRecovery .nixie-tube{width:21px;height:38px}
-#gymFloatingRecovery .nixie-digit{font-size:35px;-webkit-text-stroke:.8px #ffc077}
+#gymFloatingRecovery .nixie-digit{font-size:35px;-webkit-text-stroke:.5px #ffc077}
 #gymFloatingRecovery .nixie-colon{width:8px;gap:6px}
 #gymFloatingRecovery .nixie-colon i{width:4px;height:4px}
 #timerDock{overflow:visible}
