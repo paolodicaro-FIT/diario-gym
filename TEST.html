@@ -665,10 +665,20 @@ function schedule(){if(queued)return;queued=true;requestAnimationFrame(update)}
 pauseButton.addEventListener('click',()=>{toggle.click();schedule()});window.addEventListener('scroll',schedule,{passive:true});window.addEventListener('resize',schedule,{passive:true});new MutationObserver(schedule).observe(source,{childList:true,characterData:true,subtree:true});new MutationObserver(schedule).observe(toggle,{childList:true,characterData:true,subtree:true});new MutationObserver(schedule).observe(dock,{attributes:true,attributeFilter:['hidden']});schedule();
 })();
 </script><style id="gym-nixie-accent-v1">
-/* Nixie-inspired restrained warm glow: recovery counters only. */
-body:not(.light) #timerDock .timer,body:not(.light) #gymFloatingRecovery .gymFloatTime{color:#ffb65e!important;font-family:ui-monospace,Consolas,monospace;font-weight:800;letter-spacing:.065em;font-variant-numeric:tabular-nums;text-shadow:0 0 2px #fff1be,0 0 7px #ff7a17,0 0 17px #ff3c00b8,0 0 30px #ff3c0055}
-body:not(.light) #timerDock{border-color:#8d4b2b!important;box-shadow:inset 0 0 16px #ff64000c,0 0 16px #f76c1220}
-body:not(.light) #gymFloatingRecovery{background:linear-gradient(120deg,#281a1b,#111b2c)!important;border-color:#9c5839!important;box-shadow:0 9px 28px #0009,0 0 20px #fa661c38!important}
-body:not(.light) #gymFloatingRecovery .gymFloatLabel{color:#ffbf88}
-@media(prefers-reduced-motion:no-preference){body:not(.light) #timerDock .timer,body:not(.light) #gymFloatingRecovery .gymFloatTime{animation:gymNixieBreath 3.4s ease-in-out infinite}@keyframes gymNixieBreath{0%,100%{filter:brightness(1)}50%{filter:brightness(1.13)}}}
+/* Nixie glass tubes: dark smoked glass, copper frames, amber gas glow */
+body:not(.light) #timerDock .timer,body:not(.light) #gymFloatingRecovery .gymFloatTime{
+font-family:'Courier New',ui-monospace,monospace!important;font-weight:900!important;font-variant-numeric:tabular-nums;
+font-size:clamp(28px,7vw,43px)!important;letter-spacing:.10em!important;line-height:1.2!important;
+color:#ffd08b!important;-webkit-text-stroke:.5px #ff9a31;
+text-shadow:0 0 1px #fff4c4,0 0 3px #ffd271,0 0 6px #ff9b19,0 0 12px #ff5b00,0 0 23px #f33400,0 0 38px #e33b0070!important;
+background:repeating-linear-gradient(90deg,#080a0f 0,#131017 3px,#2b1715 6px,#0b0d14 9px,#090a0e 12px);
+border:1px solid #8d4a2b;border-radius:12px;padding:8px 13px;
+box-shadow:inset 0 2px 3px #ffe0a526,inset 0 -7px 16px #000,inset 0 0 22px #f65b001a,0 0 13px #fb5a0038;
+display:inline-block;position:relative;
+}
+body:not(.light) #timerDock{background:linear-gradient(145deg,#281719,#0a111e)!important;border:1px solid #9d4c25!important;box-shadow:inset 0 0 22px #f85b0016,0 0 17px #ff5a0030!important}
+body:not(.light) #gymFloatingRecovery{background:linear-gradient(120deg,#261315,#0b1422)!important;border:1px solid #9d4c25!important;box-shadow:0 9px 28px #000b,0 0 21px #ff600049!important}
+body:not(.light) #gymFloatingRecovery .gymFloatTime{font-size:27px!important;padding:4px 9px;border-radius:9px}
+body:not(.light) #gymFloatingRecovery .gymFloatLabel{color:#ffc08a}
+@media(prefers-reduced-motion:no-preference){body:not(.light) #timerDock .timer,body:not(.light) #gymFloatingRecovery .gymFloatTime{animation:gymNixieWarmth 4s ease-in-out infinite}@keyframes gymNixieWarmth{0%,100%{filter:brightness(1)}45%{filter:brightness(1.12)}52%{filter:brightness(1.04)}60%{filter:brightness(1.12)}}}
 </style></body></html>
