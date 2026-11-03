@@ -700,6 +700,14 @@ body:not(.light) #timerDock{background:linear-gradient(130deg,#08121d,#070b12)!i
 .nixie-display{background:linear-gradient(#0b0404,#010204);box-shadow:inset 0 0 20px #ff3c002a,0 0 15px #ff3c0070}
 #timerDock .nixie-tube{box-shadow:inset 2px 0 5px #ffa44740,inset -3px 0 7px #000,0 0 9px #f40a}
 #gymFloatingRecovery .nixie-wires{inset:5% 4% 7%;width:92%;height:88%}
+
+/* Nixie v2.3: visible unlit electrodes and no underline/base */
+.nixie-tube .nixie-base{display:none!important}
+.nixie-tube{border-bottom-color:#68321d!important}
+.nixie-off path{stroke:#d46b30!important;stroke-width:.85!important;opacity:.66!important}
+.nixie-tube:before{opacity:.45!important}
+.nixie-wires .nixie-on{stroke:#ff9415;stroke-width:1.45}
+#gymFloatingRecovery .nixie-off path{stroke-width:1!important;opacity:.68!important}
 </style>
 <script id="gym-nixie-tubes-script">
 (()=>{const source=document.getElementById('timer'),floatSource=document.getElementById('gymFloatTime');if(!source)return;
