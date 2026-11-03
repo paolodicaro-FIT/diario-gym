@@ -664,4 +664,11 @@ let queued=false;function update(){queued=false;const active=toggle.textContent.
 function schedule(){if(queued)return;queued=true;requestAnimationFrame(update)}
 pauseButton.addEventListener('click',()=>{toggle.click();schedule()});window.addEventListener('scroll',schedule,{passive:true});window.addEventListener('resize',schedule,{passive:true});new MutationObserver(schedule).observe(source,{childList:true,characterData:true,subtree:true});new MutationObserver(schedule).observe(toggle,{childList:true,characterData:true,subtree:true});new MutationObserver(schedule).observe(dock,{attributes:true,attributeFilter:['hidden']});schedule();
 })();
-</script></body></html>
+</script><style id="gym-nixie-accent-v1">
+/* Nixie-inspired restrained warm glow: recovery counters only. */
+body:not(.light) #timerDock .timer,body:not(.light) #gymFloatingRecovery .gymFloatTime{color:#ffb65e!important;font-family:ui-monospace,Consolas,monospace;font-weight:800;letter-spacing:.065em;font-variant-numeric:tabular-nums;text-shadow:0 0 2px #fff1be,0 0 7px #ff7a17,0 0 17px #ff3c00b8,0 0 30px #ff3c0055}
+body:not(.light) #timerDock{border-color:#8d4b2b!important;box-shadow:inset 0 0 16px #ff64000c,0 0 16px #f76c1220}
+body:not(.light) #gymFloatingRecovery{background:linear-gradient(120deg,#281a1b,#111b2c)!important;border-color:#9c5839!important;box-shadow:0 9px 28px #0009,0 0 20px #fa661c38!important}
+body:not(.light) #gymFloatingRecovery .gymFloatLabel{color:#ffbf88}
+@media(prefers-reduced-motion:no-preference){body:not(.light) #timerDock .timer,body:not(.light) #gymFloatingRecovery .gymFloatTime{animation:gymNixieBreath 3.4s ease-in-out infinite}@keyframes gymNixieBreath{0%,100%{filter:brightness(1)}50%{filter:brightness(1.13)}}}
+</style></body></html>
