@@ -853,6 +853,7 @@ function element(name,attrs){const e=document.createElementNS(NS,name);for(const
 function make(){const wrap=document.createElement('span');wrap.className='nixie-display';wrap.setAttribute('aria-hidden','true');for(let i=0;i<5;i++){if(i===2){const c=document.createElement('span');c.className='nixie-colon';c.innerHTML='<i></i><i></i>';wrap.append(c);continue}const tube=document.createElement('span');tube.className='nixie-tube';const svg=element('svg',{class:'nixie-wires',viewBox:'0 0 40 70','aria-hidden':'true'});const dark=element('g',{class:'nixie-off'});paths.forEach(d=>dark.append(element('path',{d})));const active=element('path',{class:'nixie-on',d:paths[0]});svg.append(dark,active);const base=document.createElement('span');base.className='nixie-base';tube.append(svg,base);wrap.append(tube)}return wrap}
 function attach(node){if(!node)return null;const display=make();node.classList.add('nixie-original');node.insertAdjacentElement('afterend',display);return display}
 const main=attach(source),floating=attach(floatSource);
+source.style.setProperty('display','none','important');
 function paint(display,value){if(!display)return;const chars=/^\d\d:\d\d$/.test(value)?value:'00:00';const digits=display.querySelectorAll('.nixie-on');[0,1,3,4].forEach((index,j)=>digits[j].setAttribute('d',paths[Number(chars[index])]))}
 function sync(){const value=source.textContent.trim();paint(main,value);paint(floating,value)}
 new MutationObserver(sync).observe(source,{childList:true,characterData:true,subtree:true});sync();
