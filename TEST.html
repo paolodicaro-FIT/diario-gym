@@ -239,6 +239,12 @@ body.light .info-muscle-label{color:#176491}
 .inline-recovery .timerbar .timer-right>.timer-actions{display:flex;align-items:center;gap:4px;min-width:0}
 .inline-recovery .timerbar .timer-right>#timerHint{grid-column:auto;grid-row:auto;margin:0;font-size:11px;line-height:1.3;text-align:center;white-space:nowrap}
 @media(max-width:380px){.inline-recovery .timerbar{column-gap:4px}.inline-recovery .timerbar .timer-right>.timer-actions{gap:3px}.inline-recovery .timerbar .timer-right>#timerHint{font-size:10px}}
+
+/* Timer compact v2: hide redundant text time, align controls with Nixie */
+#timerDock .timerbar>#timer{position:absolute!important;width:1px!important;height:1px!important;overflow:hidden!important;clip-path:inset(50%)!important;white-space:nowrap!important}
+#timerDock .timerbar>.nixie-display{grid-column:1!important;grid-row:1!important;align-self:start!important;justify-self:start!important;margin:0!important}
+#timerDock .timerbar>.timer-right{grid-column:2!important;grid-row:1!important;align-self:start!important;padding-top:0!important;margin-top:0!important}
+#timerDock .timerbar{align-items:start!important;grid-template-columns:minmax(0,1fr) auto!important;row-gap:0!important}
 </style><style id="gym-home-actions-alignment-fix">#weekEditor{scroll-margin-top:18px}#today .gym-home-actions{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));align-items:stretch;gap:9px;margin:9px 0 12px!important}#today .gym-home-actions>button#editWeek,#today .gym-home-actions>button#copySheetOpen{display:flex!important;position:relative!important;align-items:center!important;justify-content:center!important;box-sizing:border-box!important;width:100%!important;height:44px!important;min-height:44px!important;max-height:44px!important;margin:0!important;padding:7px 8px!important;top:auto!important;bottom:auto!important;transform:none!important;line-height:1.1!important;vertical-align:top!important}#today .gym-home-actions>button#editWeek{border-color:#398db7!important}#today .gym-home-actions>button#copySheetOpen{border-color:#27cfa8!important}</style><style id="gym-refresh-test">.gym-stat-section{margin-bottom:18px}.gym-stat-section .hero{margin:0}.gym-stat-section .hero h1{font-size:clamp(20px,3vw,26px)}
 #today>.sectionhead{align-items:flex-start;gap:12px}
 #days{grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
