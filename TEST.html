@@ -217,13 +217,15 @@ body.light .info-muscle-label{color:#176491}
 #exerciseList .exercise-heading-copy .exname{overflow-wrap:break-word}
 
 /* Timer controls mobile and sound picker */
-.inline-recovery .timerbar{display:grid;grid-template-columns:minmax(0,1fr);gap:8px}
-.inline-recovery .timerbar>div:first-child{min-width:0}
-.inline-recovery .timerbar>.timer-actions{display:flex;justify-content:flex-end;align-items:center;gap:7px;min-width:0}
-.inline-recovery .timer-actions .btn{min-width:0;flex:0 0 auto;padding:9px 12px}
-.inline-recovery #timerSoundButton{width:44px;padding:9px 5px;font-size:20px}
-.inline-recovery #timerReset{width:44px;padding:9px 5px}
-.inline-recovery #timerToggle{min-width:88px}
+.inline-recovery .timerbar{display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:8px;row-gap:4px;align-items:center}
+.inline-recovery .timerbar>div:first-child{display:contents}
+.inline-recovery .timerbar .timer{grid-column:1/-1;grid-row:1;justify-self:start}
+.inline-recovery #timerHint{grid-column:1;grid-row:2;min-width:0;font-size:12px;white-space:nowrap}
+.inline-recovery .timerbar>.timer-actions{grid-column:2;grid-row:2;display:flex;align-items:center;gap:5px;min-width:0}
+.inline-recovery .timer-actions .btn{min-width:0;flex:0 0 auto;padding:7px 9px;min-height:40px}
+.inline-recovery #timerSoundButton,.inline-recovery #timerReset{width:40px;padding:6px 4px;font-size:19px}
+.inline-recovery #timerToggle{min-width:76px;font-size:15px}
+@media(max-width:380px){.inline-recovery #timerHint{font-size:11px}.inline-recovery .timer-actions{gap:4px}.inline-recovery #timerSoundButton,.inline-recovery #timerReset{width:36px}.inline-recovery #timerToggle{min-width:66px}}
 .timer-sound-panel{position:fixed!important;z-index:2147483647!important;left:50%;top:50%;transform:translate(-50%,-50%);width:min(92vw,430px);max-height:75dvh;overflow:auto;background:#102536;color:#e9f7ff;border:1px solid #3b9bc4;border-radius:18px;padding:18px;box-shadow:0 0 0 100vmax #000a,0 12px 45px #000b}
 .timer-sound-panel>strong{display:block;padding-right:38px;margin-bottom:15px}.timer-sound-close{position:absolute;right:12px;top:10px;background:#19384f;color:white;border:1px solid #3b6c8d;border-radius:9px;padding:4px 12px;font-size:24px}.timer-sound-option{display:flex;gap:8px;margin:7px 0}.timer-sound-option button{border:1px solid #3b6c8d;border-radius:10px;background:#19384f;color:#e9f7ff;padding:10px 12px;font:inherit}.timer-sound-option button:first-child{flex:1;text-align:left}.timer-sound-option button:last-child{width:48px}
 </style><style id="gym-home-actions-alignment-fix">#weekEditor{scroll-margin-top:18px}#today .gym-home-actions{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));align-items:stretch;gap:9px;margin:9px 0 12px!important}#today .gym-home-actions>button#editWeek,#today .gym-home-actions>button#copySheetOpen{display:flex!important;position:relative!important;align-items:center!important;justify-content:center!important;box-sizing:border-box!important;width:100%!important;height:44px!important;min-height:44px!important;max-height:44px!important;margin:0!important;padding:7px 8px!important;top:auto!important;bottom:auto!important;transform:none!important;line-height:1.1!important;vertical-align:top!important}#today .gym-home-actions>button#editWeek{border-color:#398db7!important}#today .gym-home-actions>button#copySheetOpen{border-color:#27cfa8!important}</style><style id="gym-refresh-test">.gym-stat-section{margin-bottom:18px}.gym-stat-section .hero{margin:0}.gym-stat-section .hero h1{font-size:clamp(20px,3vw,26px)}
