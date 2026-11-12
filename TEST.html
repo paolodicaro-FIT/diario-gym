@@ -585,8 +585,8 @@ $('gymLibraryOpen').onclick=()=>{$('gymLibraryPanel').classList.toggle('hide');i
 $('gymLibraryClose').onclick=()=>$('gymLibraryPanel').classList.add('hide');
 let gymNewSheetRows=[];
 function gymNewSheetRender(){
- $('gymNewSheetExercises').innerHTML=gymNewSheetRows.map((x,i)=>'<div class="gym-new-ex-row"><label>Esercizio '+(i+1)+'</label><select data-field="name" data-i="'+i+'"><option value="">— Seleziona dal catalogo —</option>'+Object.entries(EXERCISE_CATALOG).map(([group,names])=>'<optgroup label="'+esc(group)+'">'+names.map(name=>'<option value="'+esc(name)+'" '+(x.name===name?'selected':'')+'>'+esc(name)+'</option>').join('')+'</optgroup>').join('')+'</select><div class="gym-new-ex-numbers"><label>Serie<input type="number" min="1" max="20" data-field="count" data-i="'+i+'" value="'+x.count+'"></label><label>kg<input type="number" min="0" step="0.5" data-field="kg" data-i="'+i+'" value="'+x.kg+'"></label><label>Rip.<input type="number" min="1" data-field="reps" data-i="'+i+'" value="'+x.reps+'"></label><label>Rec. (s)<input type="number" min="0" data-field="rest" data-i="'+i+'" value="'+x.rest+'"></label></div><button class="btn secondary" type="button" data-remove="'+i+'">Rimuovi</button></div>').join('');
- $('gymNewSheetExercises').querySelectorAll('[data-field]').forEach(el=>el.oninput=()=>{gymNewSheetRows[Number(el.dataset.i)][el.dataset.field]=el.value});
+ $('gymNewSheetExercises').innerHTML=gymNewSheetRows.map((x,i)=>'<div class="gym-new-ex-row"><label>Esercizio '+(i+1)+'</label><select data-field="name" data-i="'+i+'"><option value="">— Seleziona dal catalogo —</option>'+Object.entries(EXERCISE_CATALOG).map(([group,names])=>'<optgroup label="'+esc(group)+'">'+names.map(name=>'<option value="'+esc(name)+'" '+(x.name===name?'selected':'')+'>'+esc(name)+'</option>').join('')+'</optgroup>').join('')+'</select><div class="gym-new-ex-numbers"><label>Serie<input type="number" min="1" max="20" data-field="count" data-i="'+i+'" value="'+x.count+'"></label><label>kg<input type="number" min="0" step="0.5" data-field="kg" data-i="'+i+'" value="'+x.kg+'"></label><label>Rip.<input type="number" min="1" data-field="reps" data-i="'+i+'" value="'+x.reps+'"></label><label>Rec. (s)<input type="number" min="0" data-field="rest" data-i="'+i+'" value="'+x.rest+'"></label></div>')+'<button class="btn secondary" type="button" data-remove="'+i+'">Rimuovi</button></div>').join('');
+ $('gymNewSheetExercises').querySelectorAll('[data-field]').forEach(el=>el.oninput=()=>{gymNewSheetRows[Number(el.dataset.i)][el.dataset.field]=el.value;if(el.dataset.field==='name')gymNewSheetRender()});
  $('gymNewSheetExercises').querySelectorAll('[data-remove]').forEach(el=>el.onclick=()=>{gymNewSheetRows.splice(Number(el.dataset.remove),1);gymNewSheetRender()});
 }
 $('gymLibraryCreate').onclick=()=>{$('gymLibraryCreator').classList.toggle('hide');if(!$('gymLibraryCreator').classList.contains('hide')&&!gymNewSheetRows.length){gymNewSheetRows=[{name:'',count:3,kg:0,reps:10,rest:120}];gymNewSheetRender()}};
@@ -595,9 +595,17 @@ $('gymNewSheetAdd').onclick=()=>{gymNewSheetRows.push({name:'',count:3,kg:0,reps
 $('gymNewSheetSave').onclick=()=>{
  const name=$('gymNewSheetName').value.trim();
  if(!name){alert('Inserisci il nome della scheda.');return}
- if(!gymNewSheetRows.length||gymNewSheetRows.some(x=>!x.name.trim()||!(Number(x.count)>=1&&Number(x.count)<=20)||Number(x.kg)<0||Number(x.reps)<1||Number(x.rest)<0)){alert('Completa correttamente tutti gli esercizi.');return}
+ if(!gymNewSheetRows.length||gymNewSheetRows.some(x=>!x.name.trim()||(EXERCISE_CATALOG.Cardio.includes(x.name)?!(Number(x.duration)>0)||Number(x.speed)<0||Number(x.incline)<0||Number(x.incline)>40||Number(x.distance)<0:!(Number(x.count)>=1&&Number(x.count)<=20)||Number(x.kg)<0||Number(x.reps)<1||Number(x.rest)<0))){alert('Completa correttamente tutti gli esercizi.');return}
  const id='sheet_'+Date.now()+'_'+Math.random().toString(36).slice(2,8);
- const exercises=gymNewSheetRows.map((x,i)=>{const count=Number(x.count),kg=Number(x.kg),reps=Number(x.reps),rest=Number(x.rest),ex={id:'libtemplate_'+id+'_'+i,name:x.name.trim(),loads:Array(count).fill(kg),reps:Array(count).fill(reps),rest,warm:0};return {ex,sets:Array.from({length:count},()=>({kg,reps,rest,warm:false,done:false})),cardio:null}});
+ const exercises=gymNewSheetRows.map((x,i)=>{
+ const name=x.name.trim(),exId='libtemplate_'+id+'_'+i;
+ if(EXERCISE_CATALOG.Cardio.includes(name)){
+  const duration=Number(x.duration??20),speed=Number(x.speed??0),incline=Number(x.incline??0),distance=Number(x.distance??0);
+  return {ex:{id:exId,name,kind:'cardio',duration,speed,incline,distance,rest:0,loads:[],reps:[],warm:0},sets:[],cardio:{duration,speed,incline,distance,done:false}};
+ }
+ const count=Number(x.count),kg=Number(x.kg),reps=Number(x.reps),rest=Number(x.rest),ex={id:exId,name,loads:Array(count).fill(kg),reps:Array(count).fill(reps),rest,warm:0};
+ return {ex,sets:Array.from({length:count},()=>({kg,reps,rest,warm:false,done:false})),cardio:null};
+});
  state.sheetLibrary.push({id,name,created:new Date().toISOString(),exercises});persist();gymLibraryRender();$('gymLibrarySelect').value=id;$('gymLibraryCreator').classList.add('hide');gymNewSheetRows=[];$('gymNewSheetName').value='';alert('Scheda creata nella libreria, senza assegnazione settimanale.');
 };
 
