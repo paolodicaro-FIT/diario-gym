@@ -585,8 +585,15 @@ $('gymLibraryOpen').onclick=()=>{$('gymLibraryPanel').classList.toggle('hide');i
 $('gymLibraryClose').onclick=()=>$('gymLibraryPanel').classList.add('hide');
 let gymNewSheetRows=[];
 function gymNewSheetRender(){
- $('gymNewSheetExercises').innerHTML=gymNewSheetRows.map((x,i)=>'<div class="gym-new-ex-row"><label>Esercizio '+(i+1)+'</label><select data-field="name" data-i="'+i+'"><option value="">— Seleziona dal catalogo —</option>'+Object.entries(EXERCISE_CATALOG).map(([group,names])=>'<optgroup label="'+esc(group)+'">'+names.map(name=>'<option value="'+esc(name)+'" '+(x.name===name?'selected':'')+'>'+esc(name)+'</option>').join('')+'</optgroup>').join('')+'</select><div class="gym-new-ex-numbers"><label>Serie<input type="number" min="1" max="20" data-field="count" data-i="'+i+'" value="'+x.count+'"></label><label>kg<input type="number" min="0" step="0.5" data-field="kg" data-i="'+i+'" value="'+x.kg+'"></label><label>Rip.<input type="number" min="1" data-field="reps" data-i="'+i+'" value="'+x.reps+'"></label><label>Rec. (s)<input type="number" min="0" data-field="rest" data-i="'+i+'" value="'+x.rest+'"></label></div>')+'<button class="btn secondary" type="button" data-remove="'+i+'">Rimuovi</button></div>').join('');
- $('gymNewSheetExercises').querySelectorAll('[data-field]').forEach(el=>el.oninput=()=>{gymNewSheetRows[Number(el.dataset.i)][el.dataset.field]=el.value;if(el.dataset.field==='name')gymNewSheetRender()});
+ const catalogOptions=Object.entries(EXERCISE_CATALOG).map(([group,names])=>'<optgroup label="'+esc(group)+'">'+names.map(name=>'<option value="'+esc(name)+'">'+esc(name)+'</option>').join('')+'</optgroup>').join('');
+ $('gymNewSheetExercises').innerHTML=gymNewSheetRows.map((x,i)=>{
+  const cardio=EXERCISE_CATALOG.Cardio.includes(x.name);
+  const field=(label,key,value,attrs='')=>'<label>'+label+'<input type="number" '+attrs+' data-field="'+key+'" data-i="'+i+'" value="'+value+'"></label>';
+  const controls=cardio?field('Durata (min)','duration',x.duration??20,'min="1"')+field('Velocità (km/h)','speed',x.speed??0,'min="0" step="0.1"')+field('Pendenza (%)','incline',x.incline??0,'min="0" max="40" step="0.5"')+field('Distanza (km)','distance',x.distance??0,'min="0" step="0.1"'):field('Serie','count',x.count,'min="1" max="20"')+field('kg','kg',x.kg,'min="0" step="0.5"')+field('Rip.','reps',x.reps,'min="1"')+field('Rec. (s)','rest',x.rest,'min="0"');
+  return '<div class="gym-new-ex-row"><label>Esercizio '+(i+1)+'</label><select data-field="name" data-i="'+i+'"><option value="">— Seleziona dal catalogo —</option>'+catalogOptions+'</select><div class="gym-new-ex-numbers">'+controls+'</div><button class="btn secondary" type="button" data-remove="'+i+'">Rimuovi</button></div>';
+ }).join('');
+ $('gymNewSheetExercises').querySelectorAll('select[data-field="name"]').forEach(el=>{el.value=gymNewSheetRows[Number(el.dataset.i)].name});
+ $('gymNewSheetExercises').querySelectorAll('[data-field]').forEach(el=>el.onchange=()=>{gymNewSheetRows[Number(el.dataset.i)][el.dataset.field]=el.value;if(el.dataset.field==='name')gymNewSheetRender()});
  $('gymNewSheetExercises').querySelectorAll('[data-remove]').forEach(el=>el.onclick=()=>{gymNewSheetRows.splice(Number(el.dataset.remove),1);gymNewSheetRender()});
 }
 $('gymLibraryCreate').onclick=()=>{$('gymLibraryCreator').classList.toggle('hide');if(!$('gymLibraryCreator').classList.contains('hide')&&!gymNewSheetRows.length){gymNewSheetRows=[{name:'',count:3,kg:0,reps:10,rest:120}];gymNewSheetRender()}};
