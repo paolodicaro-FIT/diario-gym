@@ -1159,6 +1159,20 @@ new MutationObserver(sync).observe(source,{childList:true,characterData:true,sub
 #spotify-mini .sp-extra{max-height:45vh;overflow:auto}
 
 
+/* TEST: compact dual bottom bars while preserving usable touch targets */
+@media(max-width:760px){
+nav.bottom-nav:has(#spotify-mini){gap:3px;padding:4px 5px;border-radius:15px;bottom:calc(3px + env(safe-area-inset-bottom,0px) * .25)}
+nav.bottom-nav:has(#spotify-mini)>button.tab{min-height:43px;padding:3px 4px;gap:1px;border-radius:10px}
+nav.bottom-nav:has(#spotify-mini)>button.tab .nav-icon{font-size:17px;line-height:1}
+nav.bottom-nav:has(#spotify-mini)>button.tab small{font-size:10px;line-height:1.1}
+#spotify-mini{padding:3px 7px;margin:0;border-radius:10px}
+#spotify-mini .sp-row{min-height:30px;gap:4px}
+#spotify-mini .sp-controls{gap:3px}
+#spotify-mini .sp-controls button,#spotify-mini .sp-toggle{min-height:30px;min-width:32px;padding:3px 5px;font-size:14px;border-radius:7px}
+#spotify-mini .sp-main{margin-top:0;line-height:1.15}
+#spotify-mini .sp-status{font-size:10px}
+body.spotify-player-enabled{padding-bottom:calc(125px + env(safe-area-inset-bottom,0px))}
+}
 #spotify-mini[hidden]{display:none!important}
 </style>
 <div id="spotify-mini" aria-label="Controller Spotify Premium" hidden>
