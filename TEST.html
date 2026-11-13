@@ -1138,14 +1138,25 @@ function sync(){const value=source.textContent.trim();paint(main,value);paint(fl
 new MutationObserver(sync).observe(source,{childList:true,characterData:true,subtree:true});sync();
 })();
 </script><style id="spotify-test-style">
-#spotify-mini{position:fixed;right:14px;bottom:112px;z-index:1100;width:min(315px,calc(100vw - 28px));background:#10283b;border:1px solid #37b8d3;border-radius:17px;padding:10px 12px;box-shadow:0 8px 26px #0008;color:#e8f7ff;font:14px system-ui}
-#spotify-mini button{cursor:pointer;background:#173d54;border:1px solid #4a859e;color:#e8f7ff;border-radius:10px;padding:8px 12px;font-size:17px}
-#spotify-mini button:disabled{opacity:.4}#spotify-mini .sp-row{display:flex;align-items:center;gap:8px;justify-content:space-between}#spotify-mini .sp-controls{display:flex;gap:8px;justify-content:center;margin-top:8px}#spotify-mini .sp-status{font-size:12px;color:#a8c8d6;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:5px}#spotify-mini.sp-collapsed .sp-body{display:none}
+#spotify-mini{position:sticky;top:4px;z-index:950;width:100%;margin:8px 0 12px;background:#10283b;border:1px solid #37b8d3;border-radius:13px;padding:6px 9px;box-shadow:0 5px 14px #0006;color:#e8f7ff;font:13px system-ui}
+#spotify-mini button{cursor:pointer;background:#173d54;border:1px solid #4a859e;color:#e8f7ff;border-radius:9px;padding:6px 9px;font-size:15px;min-height:34px}
+#spotify-mini .sp-row{display:flex;align-items:center;gap:7px;justify-content:space-between}
+#spotify-mini .sp-controls{display:flex;align-items:center;gap:5px;justify-content:center}
+#spotify-mini .sp-status{font-size:11px;color:#a8c8d6;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#spotify-mini .sp-main{display:flex;align-items:center;gap:8px;min-width:0}
+#spotify-mini .sp-track-wrap{flex:1;min-width:0}
+#spotify-mini .sp-controls button{padding:5px 8px;min-width:36px}
+#spotify-mini .sp-extra{display:none;gap:7px;align-items:center;flex-wrap:wrap;margin-top:6px}
+#spotify-mini.sp-expanded .sp-extra{display:flex}
+#spotify-mini .sp-extra button{font-size:11px;min-height:29px;padding:4px 7px}
+#spotify-mini.sp-collapsed .sp-main,#spotify-mini.sp-collapsed .sp-extra{display:none}
+#spotify-mini .sp-toggle{font-size:12px}
+@media(max-width:430px){#spotify-mini{font-size:12px}#spotify-mini .sp-controls button{min-width:32px;padding:5px 6px}#spotify-mini .sp-main{gap:5px}}
 </style>
-<div id="spotify-mini" class="sp-collapsed" aria-label="Controller Spotify TEST">
- <div class="sp-row"><strong>🎵 Spotify</strong><button id="sp-toggle" type="button" aria-label="Apri o chiudi controller">Apri</button></div>
- <div class="sp-body"><div class="sp-status" id="sp-track">Non collegato</div><div class="sp-controls"><button id="sp-prev" title="Precedente">⏮</button><button id="sp-play" title="Play/Pausa">▶</button><button id="sp-next" title="Successivo">⏭</button></div>
- <div class="sp-row" style="margin-top:8px"><button id="sp-login" style="font-size:12px">Collega Spotify</button><button id="sp-logout" style="font-size:12px">Scollega</button><button id="sp-refresh" style="font-size:12px">↻</button></div><div class="sp-status" id="sp-status" role="status">Spotify deve essere aperto su un dispositivo attivo.</div></div>
+<div id="spotify-mini" aria-label="Controller Spotify TEST">
+<div class="sp-row"><strong>🎵 Spotify</strong><div class="sp-controls"><button id="sp-prev" title="Precedente">⏮</button><button id="sp-play" title="Play/Pausa">▶</button><button id="sp-next" title="Successivo">⏭</button></div><button id="sp-toggle" class="sp-toggle" type="button" aria-label="Opzioni Spotify">⚙</button></div>
+<div class="sp-main"><div class="sp-track-wrap"><div class="sp-status" id="sp-track">Non collegato</div></div></div>
+<div class="sp-extra"><button id="sp-login">Collega Spotify</button><button id="sp-logout">Scollega</button><button id="sp-refresh">↻ Aggiorna</button><button id="sp-open">Apri Spotify</button><div class="sp-status" id="sp-status" role="status">Spotify deve essere aperto su un dispositivo attivo.</div></div>
 </div>
 <script id="spotify-test-controller">
 (()=>{'use strict';
@@ -1162,11 +1173,14 @@ async function api(path,method='GET'){const r=await fetch('https://api.spotify.c
 function renderPlay(){const b=$('sp-play');b.textContent=playing?'⏸':'▶';b.title=playing?'Pausa':'Riproduci';b.setAttribute('aria-label',b.title);b.setAttribute('aria-pressed',String(playing))}
 async function refresh(){if(!tokens){track('Non collegato');return}if(busy)return;const current=revision;try{const p=await api('/me/player');if(current!==revision||busy)return;playing=!!p?.is_playing;renderPlay();track(p?.item?((p.item.name||'Brano')+' · '+(p.item.artists||[]).map(a=>a.name).join(', ')):'Nessun brano attivo');status(p?.device?'Dispositivo: '+p.device.name:'Apri Spotify e avvia un brano')}catch(e){if(current===revision&&!busy)status(e.message)}}
 async function command(path,method){if(busy)return;busy=true;revision++;const isToggle=path.endsWith('/play')||path.endsWith('/pause'),previous=playing;if(isToggle){playing=path.endsWith('/play');renderPlay()}status('Invio comando…');try{await api(path,method);status('Comando inviato');}catch(e){if(isToggle){playing=previous;renderPlay()}status(e.message)}finally{busy=false}setTimeout(()=>refresh(),1000)}
-async function callback(){const u=new URL(location.href),code=u.searchParams.get('code'),error=u.searchParams.get('error');if(!code&&!error)return;const state=u.searchParams.get('state'),expected=store.getItem(KEY+'_state'),verifier=store.getItem(KEY+'_verifier');history.replaceState(history.state,'',location.pathname+(store.getItem(KEY+'_return')||''));store.removeItem(KEY+'_state');store.removeItem(KEY+'_verifier');store.removeItem(KEY+'_return');$('spotify-mini').classList.remove('sp-collapsed');$('sp-toggle').textContent='Chiudi';if(error){status('Spotify: '+error);return}if(!expected||state!==expected||!verifier){status('Verifica di sicurezza non riuscita. Riprova.');return}try{await exchange({grant_type:'authorization_code',code,redirect_uri:REDIRECT,client_id:CLIENT,code_verifier:verifier});status('Spotify collegato');await refresh()}catch(e){status(e.message)}}
-$('sp-toggle').onclick=()=>{const closed=$('spotify-mini').classList.toggle('sp-collapsed');$('sp-toggle').textContent=closed?'Apri':'Chiudi';if(!closed)refresh()};
+async function callback(){const u=new URL(location.href),code=u.searchParams.get('code'),error=u.searchParams.get('error');if(!code&&!error)return;const state=u.searchParams.get('state'),expected=store.getItem(KEY+'_state'),verifier=store.getItem(KEY+'_verifier');history.replaceState(history.state,'',location.pathname+(store.getItem(KEY+'_return')||''));store.removeItem(KEY+'_state');store.removeItem(KEY+'_verifier');store.removeItem(KEY+'_return');$('spotify-mini').classList.add('sp-expanded');if(error){status('Spotify: '+error);return}if(!expected||state!==expected||!verifier){status('Verifica di sicurezza non riuscita. Riprova.');return}try{await exchange({grant_type:'authorization_code',code,redirect_uri:REDIRECT,client_id:CLIENT,code_verifier:verifier});status('Spotify collegato');await refresh()}catch(e){status(e.message)}}
+$('sp-toggle').onclick=()=>{$('spotify-mini').classList.toggle('sp-expanded');refresh()};
 $('sp-login').onclick=login;$('sp-logout').onclick=()=>{tokens=null;store.removeItem(KEY+'_tokens');revision++;playing=false;renderPlay();track('Non collegato');status('Connessione locale rimossa')};$('sp-refresh').onclick=refresh;
-$('sp-play').onclick=()=>command(playing?'/me/player/pause':'/me/player/play','PUT');$('sp-prev').onclick=()=>command('/me/player/previous','POST');$('sp-next').onclick=()=>command('/me/player/next','POST');
-renderPlay();document.addEventListener('visibilitychange',()=>{if(!document.hidden)refresh()});setInterval(()=>{if(!document.hidden&&tokens&&!$('spotify-mini').classList.contains('sp-collapsed'))refresh()},5000);callback();
+$('sp-open').onclick=()=>window.open('https://open.spotify.com/','_blank','noopener');
+$('sp-play').onclick=async()=>{if(!tokens){status('Collega Spotify nelle opzioni ⚙');$('spotify-mini').classList.add('sp-expanded');return}await command(playing?'/me/player/pause':'/me/player/play','PUT')};
+$('sp-prev').onclick=()=>command('/me/player/previous','POST');$('sp-next').onclick=()=>command('/me/player/next','POST');
+const brand=document.querySelector('main.wrap > header.gym-brand-header');if(brand)brand.insertAdjacentElement('afterend',$('spotify-mini'));
+renderPlay();document.addEventListener('visibilitychange',()=>{if(!document.hidden)refresh()});setInterval(()=>{if(!document.hidden&&tokens&&true)refresh()},5000);callback();
 })();
 </script>
 </body></html>
