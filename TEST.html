@@ -915,7 +915,7 @@ if(!rows.length){chart.innerHTML='<div class="empty">Nessun carico valido regist
 const fmt=v=>Number(v).toLocaleString('it-IT',{maximumFractionDigits:1});
 let mode='both';try{mode=localStorage.getItem('diariogym_chart_mode_v2')||'both'}catch{}
 if(!['both','kg','reps'].includes(mode))mode='both';
-chart.innerHTML=`<div class="gym-chart-modes"><button type="button" data-mode="kg">Carico</button><button type="button" data-mode="reps">Ripetizioni</button><button type="button" data-mode="both">Entrambi</button></div><div class="gym-chart-scroll"><div id="gymLineGraphic"></div></div><div id="gymLineInfo" class="gym-chart-point-info"></div><p class="small muted">Scorri lateralmente · tocca un punto per i valori.</p>`+`<details id="gymAllSeriesDetails" style="margin-top:8px;border-top:1px solid var(--stroke);padding-top:8px" ${wasOpen?'open':''}><summary style="cursor:pointer;display:flex;align-items:center;gap:9px;font-weight:700;font-size:14px;list-style:none"><span style="display:inline-grid;place-items:center;width:29px;height:29px;border:1px solid var(--cyan);border-radius:8px;color:var(--cyan);font-size:21px">+</span> Tutte le serie allenanti</summary><div style="margin-top:10px"><select id="gymDetailDate" aria-label="Seleziona seduta per dettaglio serie" style="width:100%;padding:8px">${rows.map((r,i)=>`<option value="${i}" ${String(i)===String(oldDate??rows.length-1)?'selected':''}>${r.date}</option>`).join('')}</select><div id="gymSeriesExpanded" style="margin-top:9px"></div></div></details>`;
+chart.innerHTML=`<div class="gym-chart-modes"><button type="button" data-mode="kg">Carico</button><button type="button" data-mode="reps">Ripetizioni</button><button type="button" data-mode="both">Entrambi</button></div><div class="gym-chart-scroll"><div id="gymLineGraphic"></div></div><div id="gymLineInfo" class="gym-chart-point-info"></div><p class="small muted">Trascina il dito sul grafico per scegliere la seduta; vicino ai bordi scorri anche lo storico.</p>`+`<details id="gymAllSeriesDetails" style="margin-top:8px;border-top:1px solid var(--stroke);padding-top:8px" ${wasOpen?'open':''}><summary style="cursor:pointer;display:flex;align-items:center;gap:9px;font-weight:700;font-size:14px;list-style:none"><span style="display:inline-grid;place-items:center;width:29px;height:29px;border:1px solid var(--cyan);border-radius:8px;color:var(--cyan);font-size:21px">+</span> Tutte le serie allenanti</summary><div style="margin-top:10px"><select id="gymDetailDate" aria-label="Seleziona seduta per dettaglio serie" style="width:100%;padding:8px">${rows.map((r,i)=>`<option value="${i}" ${String(i)===String(oldDate??rows.length-1)?'selected':''}>${r.date}</option>`).join('')}</select><div id="gymSeriesExpanded" style="margin-top:9px"></div></div></details>`;
 const graphic=chart.querySelector('#gymLineGraphic'),scroll=chart.querySelector('.gym-chart-scroll'),info=chart.querySelector('#gymLineInfo');let chosen=rows.length-1;
 function paint(){
 const width=Math.max(320,rows.length*65+45),xx=i=>35+i*65;
@@ -932,7 +932,36 @@ graphic.querySelector('svg').insertAdjacentHTML('beforeend',bubble);
 graphic.querySelectorAll('[data-idx]').forEach(el=>el.onclick=()=>{chosen=Number(el.dataset.idx);paint()});
 }
 chart.querySelectorAll('[data-mode]').forEach(btn=>btn.onclick=()=>{mode=btn.dataset.mode;try{localStorage.setItem('diariogym_chart_mode_v2',mode)}catch{}paint()});
-paint();scroll.scrollLeft=scroll.scrollWidth;const dateSelect=chart.querySelector('#gymDetailDate');const renderSets=()=>{const r=rows[Number(dateSelect.value)]||rows[rows.length-1];const maxKg=Math.max(...r.sets.map(v=>v.kg),1),maxR=Math.max(...r.sets.map(v=>v.reps||0),1);chart.querySelector('#gymSeriesExpanded').innerHTML=`<div style="display:flex;gap:8px;align-items:end;height:120px;border-bottom:1px solid var(--stroke)">${r.sets.map(v=>`<div style="flex:1;min-width:0;text-align:center"><div style="font-size:11px">S${v.number}</div><div style="display:flex;gap:3px;align-items:end;justify-content:center;height:85px"><div title="${fmt(v.kg)} kg" style="width:43%;height:${Math.max(4,v.kg/maxKg*80)}px;background:linear-gradient(#52e4e4,#278bd4);border-radius:4px 4px 0 0"></div><div title="${v.reps??'–'} rip." style="width:43%;height:${v.reps==null?0:Math.max(4,v.reps/maxR*80)}px;background:linear-gradient(#ffd080,#e48a20);border-radius:4px 4px 0 0"></div></div></div>`).join('')}</div><div style="margin-top:8px">${r.sets.map(v=>`<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--stroke);font-size:13px"><span>Serie ${v.number}</span><span style="color:#52d7ed">${fmt(v.kg)} kg</span><span style="color:#ffd080">${v.reps==null?'–':fmt(v.reps)} rip.</span></div>`).join('')}</div>`};dateSelect.onchange=renderSets;renderSets();
+paint();scroll.scrollLeft=scroll.scrollWidth;
+const graphSvg=()=>graphic.querySelector('svg');
+let dragging=false,activePointer=null;
+const selectNearest=e=>{
+ const svg=graphSvg();if(!svg)return;
+ const bounds=svg.getBoundingClientRect();if(!bounds.width)return;
+ const x=(e.clientX-bounds.left)*widthForPointer()/bounds.width;
+ const idx=Math.max(0,Math.min(rows.length-1,Math.round((x-35)/65)));
+ if(idx!==chosen){chosen=idx;paint()}
+};
+const widthForPointer=()=>Math.max(320,rows.length*65+45);
+scroll.style.touchAction='pan-y';
+scroll.addEventListener('pointerdown',e=>{
+ if(e.pointerType==='mouse'&&e.button!==0)return;
+ dragging=true;activePointer=e.pointerId;
+ try{scroll.setPointerCapture(e.pointerId)}catch{}
+ selectNearest(e);
+});
+scroll.addEventListener('pointermove',e=>{
+ if(!dragging||e.pointerId!==activePointer)return;
+ const rect=scroll.getBoundingClientRect(),edge=28;
+ if(e.clientX>rect.right-edge)scroll.scrollLeft+=16;
+ else if(e.clientX<rect.left+edge)scroll.scrollLeft-=16;
+ selectNearest(e);
+});
+const stopDrag=e=>{if(e.pointerId===activePointer){dragging=false;activePointer=null}};
+scroll.addEventListener('pointerup',stopDrag);
+scroll.addEventListener('pointercancel',stopDrag);
+scroll.addEventListener('lostpointercapture',stopDrag);
+const dateSelect=chart.querySelector('#gymDetailDate');const renderSets=()=>{const r=rows[Number(dateSelect.value)]||rows[rows.length-1];const maxKg=Math.max(...r.sets.map(v=>v.kg),1),maxR=Math.max(...r.sets.map(v=>v.reps||0),1);chart.querySelector('#gymSeriesExpanded').innerHTML=`<div style="display:flex;gap:8px;align-items:end;height:120px;border-bottom:1px solid var(--stroke)">${r.sets.map(v=>`<div style="flex:1;min-width:0;text-align:center"><div style="font-size:11px">S${v.number}</div><div style="display:flex;gap:3px;align-items:end;justify-content:center;height:85px"><div title="${fmt(v.kg)} kg" style="width:43%;height:${Math.max(4,v.kg/maxKg*80)}px;background:linear-gradient(#52e4e4,#278bd4);border-radius:4px 4px 0 0"></div><div title="${v.reps??'–'} rip." style="width:43%;height:${v.reps==null?0:Math.max(4,v.reps/maxR*80)}px;background:linear-gradient(#ffd080,#e48a20);border-radius:4px 4px 0 0"></div></div></div>`).join('')}</div><div style="margin-top:8px">${r.sets.map(v=>`<div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--stroke);font-size:13px"><span>Serie ${v.number}</span><span style="color:#52d7ed">${fmt(v.kg)} kg</span><span style="color:#ffd080">${v.reps==null?'–':fmt(v.reps)} rip.</span></div>`).join('')}</div>`};dateSelect.onchange=renderSets;renderSets();
 };$('chartExercise').onchange=drawChart;function applyTheme(){document.body.classList.toggle('light',!!state.settings.light)}$('themeBtn').onclick=()=>{state.settings.light=!state.settings.light;applyTheme();persist()};$('autoTimer').checked=state.settings.autoTimer;$('autoTimer').onchange=e=>{state.settings.autoTimer=e.target.checked;persist()};$('exportBtn').onclick=()=>{const blob=new Blob([JSON.stringify({format:'DiarioGYM-v0.1',exportedAt:today(),state},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='DiarioGYM-backup-'+new Date().toISOString().slice(0,10)+'.json';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)};$('importFile').onchange=async e=>{const file=e.target.files[0];if(!file)return;try{const obj=JSON.parse(await file.text());if(obj.format!=='DiarioGYM-v0.1'||!obj.state||!Array.isArray(obj.state.history))throw Error('Formato non valido');if(!confirm('Importare il backup sostituendo i dati locali attuali?'))return;state=obj.state;state.drafts||={};state.settings||={autoTimer:true,light:false};state.customExercises||={};state.exerciseRest||={};state.hiddenExercises||={};state.exerciseProgress||={};state.week||={};state.week.enabled??=['mon','wed','fri'];state.week.titles||={};state.day=state.week.enabled.includes(state.day)?state.day:state.week.enabled[0]||'mon';day=state.day;applyTheme();render();alert('Backup importato')}catch(err){alert('Impossibile importare: '+err.message)}e.target.value=''};$('clearDraft').onclick=()=>{if(confirm('Azzerare le serie della seduta corrente? Lo storico rimarrà intatto.')){delete state.drafts[day];render()}};applyTheme();render();timerDraw();
 </script><script>
 if(new URLSearchParams(location.search).get('verifica')==='foto'){
