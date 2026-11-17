@@ -888,42 +888,15 @@ gymBackNotice.setAttribute('role','status');
 gymBackNotice.style.cssText='display:none;position:fixed;bottom:110px;left:50%;transform:translateX(-50%);z-index:99999;padding:12px 15px;background:#173247;color:#fff;border:1px solid #54b5d1;border-radius:12px;font:600 14px system-ui;white-space:nowrap';
 document.body.appendChild(gymBackNotice);
 let gymBackNoticeTimer;
-let gymBackExiting=false;
-let gymBackArmed=false;
-function gymBackArm(){
- if(gymBackExiting)return;
- if(window.history.state?.diarioGymGuard){gymBackArmed=true;return}
- window.history.pushState({diarioGymGuard:1},'',window.location.href);
- gymBackArmed=true;
-}
-function gymBackShow(){
- gymBackNotice.style.display='block';
- clearTimeout(gymBackNoticeTimer);
- gymBackNoticeTimer=setTimeout(()=>gymBackNotice.style.display='none',2000);
-}
-function gymBackHandle(){
- if(gymBackExiting)return;
+function gymBackArm(){window.history.pushState({diarioGymGuard:1},'',window.location.href)}
+function gymBackShow(){gymBackNotice.style.display='block';clearTimeout(gymBackNoticeTimer);gymBackNoticeTimer=setTimeout(()=>gymBackNotice.style.display='none',1800)}
+gymBackArm();
+window.addEventListener('popstate',()=>{
  const current=['history','settings'].find(x=>!$(x).classList.contains('hide'));
  if(current){showTab('today');gymBackLast=0;gymBackNotice.style.display='none';gymBackArm();return}
  if(gymWorkoutExpanded){setGymWorkoutExpanded(false);gymBackLast=0;gymBackNotice.style.display='none';gymBackArm();return}
- if(Date.now()-gymBackLast<2000){
-  gymBackExiting=true;
-  gymBackNotice.style.display='none';
-  window.history.back();
-  return;
- }
+ if(Date.now()-gymBackLast<2000){gymBackNotice.style.display='none';window.history.back();return}
  gymBackLast=Date.now();gymBackShow();gymBackArm();
-}
-window.addEventListener('popstate',gymBackHandle);
-gymBackArm();
-/* Chrome Android may skip pushState entries made before any user interaction.
-   Refresh the sentinel after a genuine tap, without stacking extra entries. */
-document.addEventListener('pointerdown',()=>{
- if(gymBackExiting)return;
- if(!window.history.state?.diarioGymGuard)gymBackArm();
-},{passive:true});
-window.addEventListener('pageshow',()=>{
- if(!gymBackExiting && !window.history.state?.diarioGymGuard)gymBackArm();
 });
 document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{gymBackLast=0;showTab(b.dataset.tab)});function renderHistory(){updateSummary();const h=state.history.map((x,i)=>({...x,_historyIndex:i})).reverse();$('historyList').innerHTML=h.length?('<div class="field"><select id="gymHistorySelect" aria-label="Seleziona allenamento archiviato"><option value="">Seleziona una seduta… ('+h.length+')</option>'+h.map(x=>'<option value="'+x._historyIndex+'">'+esc(x.dayName)+' · '+fmtDate(x.date)+' — '+esc(x.title)+' · '+(x.sets||[]).filter(v=>v.done).length+' serie</option>').join('')+'</select></div><div id="gymHistorySelected"></div>'):'<div class="empty">Nessun allenamento salvato.<br>Completa la prima seduta per vedere i progressi.</div>';const chosenIndex=$('historyList').dataset.selectedIndex;const historySelect=$('gymHistorySelect');if(historySelect&&chosenIndex!==undefined&&state.history[Number(chosenIndex)]){historySelect.value=chosenIndex;const x=state.history[Number(chosenIndex)];$('gymHistorySelected').innerHTML='<div class="historyitem"><div class="historyline"><div><b>'+esc(x.dayName)+' · '+fmtDate(x.date)+'</b><div class="small muted">'+esc(x.title)+' · '+(x.sets||[]).filter(v=>v.done).length+' serie · Fastidio '+x.pain+'/10 · Energia '+x.energy+'/5</div></div><button type="button" class="btn secondary smallbtn" data-history-open="'+chosenIndex+'">👁 Apri</button> <button type="button" class="btn secondary smallbtn history-delete" data-history-delete="'+chosenIndex+'">🗑 Elimina</button></div></div>';}const openIndex=Number($('historyList').dataset.openIndex);if(Number.isInteger(openIndex)&&state.history[openIndex]){const session=state.history[openIndex];const rows=session.plannedSets?.length?session.plannedSets:session.sets||[];const grouped=new Map();rows.forEach(v=>{const key=v.exerciseId||v.exerciseName||'Esercizio';if(!grouped.has(key))grouped.set(key,{name:v.exerciseName||key,sets:[]});grouped.get(key).sets.push(v)});const details=[...grouped.values()].map(g=>'<div class="card" style="margin:10px 0;padding:12px"><b>'+esc(g.name)+'</b>'+g.sets.map((v,i)=>'<div class="small" style="padding:5px 0;border-bottom:1px solid var(--stroke)">Serie '+(v.seriesNumber||i+1)+' · '+(v.duration!=null?esc(v.duration)+' s':esc(v.kg??'—')+' kg · '+esc(v.reps??'—')+' rip.')+(v.failure?' · Cedimento':'')+' · '+(v.done?'✓ Completata':'Non completata')+'</div>').join('')+'</div>').join('');$('historyList').insertAdjacentHTML('afterbegin','<div class="card" style="margin-bottom:16px"><div class="historyline"><b>Dettaglio · '+esc(session.dayName||'Seduta')+' · '+esc(fmtDate(session.date))+'</b><button type="button" class="btn secondary smallbtn" data-history-close="1">Chiudi</button></div><p class="small muted">Valori registrati durante la seduta. Le sessioni precedenti possono mostrare solo le serie completate.</p>'+details+(session.cardio||[]).map(c=>'<p class="small">'+esc(c.exerciseName||'Cardio')+' · '+esc(c.duration??'—')+' min</p>').join('')+'</div>');} const names=new Map();const normalized=v=>String(v||'').trim().toLocaleLowerCase('it-IT').replace(/\\s+/g,' ');const addExercise=ex=>{if(!ex?.id||!ex?.name)return;const key=normalized(ex.name);if(!names.has(key))names.set(key,{id:String(ex.id),name:ex.name})};for(const d of DAYS){const candidates=[...(d.type?EX[d.type]||[]:[]),...(state.customExercises?.[d.key]||[])];for(const ex of candidates)if(!(state.hiddenExercises?.[d.key]||[]).includes(ex.id))addExercise(ex)}const select=$('chartExercise');const oldName=normalized(select.selectedOptions[0]?.textContent);select.innerHTML=[...names.values()].sort((a,b)=>a.name.localeCompare(b.name,'it')).map(v=>`<option value="${esc(v.id)}">${esc(v.name)}</option>`).join('');const previous=[...select.options].find(o=>normalized(o.textContent)===oldName);if(previous)select.value=previous.value;drawChart()}$('historyList').addEventListener('change',e=>{if(e.target.id!=='gymHistorySelect')return;const value=e.target.value;if(value===''){delete $('historyList').dataset.selectedIndex;delete $('historyList').dataset.openIndex;}else{$('historyList').dataset.selectedIndex=value;delete $('historyList').dataset.openIndex;}renderHistory();});$('historyList').addEventListener('click',e=>{const close=e.target.closest('[data-history-close]');if(close){delete $('historyList').dataset.openIndex;renderHistory();return}const open=e.target.closest('[data-history-open]');if(open){$('historyList').dataset.openIndex=open.dataset.historyOpen;renderHistory();return}const b=e.target.closest('[data-history-delete]');if(!b)return;const index=Number(b.dataset.historyDelete);const session=state.history[index];if(!session)return;if(!confirm('Eliminare definitivamente la sessione di '+session.dayName+' del '+new Date(session.date).toLocaleDateString('it-IT')+'? Questa operazione non è annullabile.'))return;state.history.splice(index,1);persist();renderHistory();});
 function drawChart(){
