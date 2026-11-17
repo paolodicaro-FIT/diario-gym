@@ -505,7 +505,7 @@ body.light .gym-preferences-card #themeBtn{background:#e2f4fc;color:#18465f}
 .gym-mini-pair i+i{background:linear-gradient(#ffd080,#e48a20)}
 .gym-mini-empty{display:block;font-size:10px;color:#9bb3c3;margin-top:12px}
 @media(max-width:390px){.gym-mini-progress{flex-basis:98px;padding:4px}.gym-mini-caption{font-size:10px}}
-</style><style id="gym-mini-progress-v2">
+.gym-mini-lines{display:block;width:100%;height:44px;margin-top:2px;overflow:visible}\n</style><style id="gym-mini-progress-v2">
 .gym-mini-progress{position:relative;border-color:#39809a}
 .gym-mini-trend{position:absolute;top:18px;right:5px;font-size:9px;font-weight:700;color:#b8d6e4;white-space:nowrap}
 .gym-mini-up .gym-mini-trend{color:#7ee7a7}
@@ -808,8 +808,11 @@ function mountExerciseSparklines(){
    const delta=earlier?latest.reps-earlier.reps:null;
    const trend=delta===null?'':(delta>0?'+'+delta+' rip.':delta<0?delta+' rip.':'= rip.');
    mini.classList.toggle('gym-mini-up',delta!==null&&delta>0);
-   const mk=Math.max(...rows.map(r=>r.kg),1),mr=Math.max(...rows.map(r=>r.reps),1);
-   mini.innerHTML='<span class="gym-mini-caption">Progressi ↗</span>'+(trend?'<span class="gym-mini-trend">'+trend+'</span>':'')+'<span class="gym-mini-bars">'+rows.map((r,i)=>'<span class="gym-mini-pair '+(i===rows.length-1?'gym-mini-latest':'')+'"><i style="height:'+Math.max(5,r.kg/mk*54)+'px"></i><i style="height:'+Math.max(5,r.reps/mr*54)+'px"></i></span>').join('')+'</span>';
+   const maxK=Math.max(...rows.map(r=>r.kg)),minK=Math.min(...rows.map(r=>r.kg)),maxR=Math.max(...rows.map(r=>r.reps)),minR=Math.min(...rows.map(r=>r.reps));
+   const x=i=>rows.length===1?47:8+i*78/(rows.length-1);
+   const y=(v,min,max)=>42-(v-Math.max(0,min-Math.max((max-min)*.3,1)))/(max+Math.max((max-min)*.3,1)-Math.max(0,min-Math.max((max-min)*.3,1)))*31;
+   const path=(key,min,max,color)=>'<polyline points="'+rows.map((r,i)=>x(i)+','+y(r[key],min,max)).join(' ')+'" fill="none" stroke="'+color+'" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" filter="url(#miniGlow)"/>'+rows.map((r,i)=>'<circle cx="'+x(i)+'" cy="'+y(r[key],min,max)+'" r="2.5" fill="'+color+'"/>').join('');
+   mini.innerHTML='<span class="gym-mini-caption">Progressi ↗</span>'+(trend?'<span class="gym-mini-trend">'+trend+'</span>':'')+'<svg class="gym-mini-lines" viewBox="0 0 94 49" aria-hidden="true"><defs><filter id="miniGlow" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>'+path('kg',minK,maxK,'#32d8f4')+path('reps',minR,maxR,'#ffad40')+'</svg>';
   }else mini.innerHTML='<span class="gym-mini-caption">Progressi ↗</span><span class="gym-mini-empty">Nessuno storico</span>';
   anchor.parentElement.insertBefore(wrap,anchor);wrap.append(anchor,mini);
  }
@@ -912,8 +915,8 @@ function paint(){
 const width=Math.max(320,rows.length*65+45),xx=i=>35+i*65;
 const domain=key=>{const vals=rows.map(r=>key==='kg'?r.max:r.reps).filter(Number.isFinite);if(!vals.length)return [0,1];const lo=Math.min(...vals),hi=Math.max(...vals),pad=Math.max((hi-lo)*.3,key==='kg'?2:1);return [Math.max(0,lo-pad),hi+pad]};
 const kd=domain('kg'),rd=domain('reps'),yy=(v,key)=>{const [lo,hi]=key==='kg'?kd:rd;return 145-(v-lo)/(hi-lo)*127};
-const line=(key,color)=>{const pts=rows.map((r,i)=>({i,v:key==='kg'?r.max:r.reps})).filter(p=>Number.isFinite(p.v));return `<polyline points="${pts.map(p=>xx(p.i)+','+yy(p.v,key)).join(' ')}" fill="none" stroke="${color}" stroke-width="3" stroke-linejoin="round" filter="url(#gymGlow)"/>`+pts.map(p=>`<circle cx="${xx(p.i)}" cy="${yy(p.v,key)}" r="6" fill="${color}" stroke="#10283b" stroke-width="2"/><circle data-idx="${p.i}" cx="${xx(p.i)}" cy="${yy(p.v,key)}" r="18" fill="transparent"/>`).join('')};
-graphic.innerHTML=`<svg viewBox="0 0 ${width} 185" width="${width}" height="185" xmlns="http://www.w3.org/2000/svg"><defs><filter id="gymGlow" x="-30%" y="-60%" width="160%" height="220%"><feGaussianBlur stdDeviation="2" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>${[0,1,2,3].map(i=>`<line x1="15" x2="${width-12}" y1="${18+i*42}" y2="${18+i*42}" stroke="#58768d" stroke-opacity=".3" stroke-dasharray="3 6"/>`).join('')}${mode!=='reps'?line('kg','#32d8f4'):''}${mode!=='kg'?line('reps','#ffad40'):''}${rows.map((r,i)=>`<text x="${xx(i)}" y="176" text-anchor="middle" fill="#a8bed2" font-size="11">${r.date}</text>`).join('')}</svg>`;
+const line=(key,color)=>{const pts=rows.map((r,i)=>({i,v:key==='kg'?r.max:r.reps})).filter(p=>Number.isFinite(p.v));return `<polyline points="${pts.map(p=>xx(p.i)+','+yy(p.v,key)).join(' ')}" fill="none" stroke="${color}" stroke-width="3.5" stroke-linejoin="round" filter="url(#gymGlow)"/>`+pts.map(p=>`<circle cx="${xx(p.i)}" cy="${yy(p.v,key)}" r="6" fill="${color}" stroke="#10283b" stroke-width="2"/><circle data-idx="${p.i}" cx="${xx(p.i)}" cy="${yy(p.v,key)}" r="18" fill="transparent"/>`).join('')};
+graphic.innerHTML=`<svg viewBox="0 0 ${width} 185" width="${width}" height="185" xmlns="http://www.w3.org/2000/svg"><defs><filter id="gymGlow" x="-30%" y="-60%" width="160%" height="220%"><feGaussianBlur stdDeviation="3.6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>${[0,1,2,3].map(i=>`<line x1="15" x2="${width-12}" y1="${18+i*42}" y2="${18+i*42}" stroke="#58768d" stroke-opacity=".3" stroke-dasharray="3 6"/>`).join('')}${mode!=='reps'?line('kg','#32d8f4'):''}${mode!=='kg'?line('reps','#ffad40'):''}${rows.map((r,i)=>`<text x="${xx(i)}" y="176" text-anchor="middle" fill="#a8bed2" font-size="11">${r.date}</text>`).join('')}</svg>`;
 chart.querySelectorAll('[data-mode]').forEach(btn=>{btn.classList.toggle('active',btn.dataset.mode===mode);btn.setAttribute('aria-pressed',String(btn.dataset.mode===mode))});
 const r=rows[chosen];info.textContent=r.date+' · '+fmt(r.max)+' kg · '+(r.reps===null?'–':fmt(r.reps))+' rip.';
 graphic.querySelectorAll('[data-idx]').forEach(el=>el.onclick=()=>{chosen=Number(el.dataset.idx);paint()});
